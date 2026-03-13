@@ -30,6 +30,7 @@ secrets = boto3.client('secretsmanager')
 
 # Environment variables
 SLACK_WEBHOOK_SECRET = os.environ.get('SLACK_WEBHOOK_SECRET', 'echo/slack-webhook')
+AI_CONFIG_SECRET = os.environ.get('AI_CONFIG_SECRET', 'echo/ai-config')
 
 
 def lambda_handler(event, context):
@@ -199,11 +200,17 @@ Respond ONLY with valid JSON, no markdown formatting.
 """
     
     try:
-        # Call Bedrock using the new Inference Profile ID
+        # Fetch AI Config from Secrets Manager
+        secret_response = secrets.get_secret_value(SecretId=AI_CONFIG_SECRET)
+        ai_config = json.loads(secret_response['SecretString'])
+        model_id = ai_config.get('model_id', 'global.anthropic.claude-sonnet-4-6')
+        anthropic_version = ai_config.get('anthropic_version', 'bedrock-2023-05-31')
+        
+        # Call Bedrock using the configured Inference Profile ID and version
         response = bedrock.invoke_model(
-            modelId='global.anthropic.claude-sonnet-4-6',
+            modelId=model_id,
             body=json.dumps({
-                "anthropic_version": "bedrock-2023-05-31",
+                "anthropic_version": anthropic_version,
                 "max_tokens": 2000,
                 "messages": [{
                     "role": "user",
