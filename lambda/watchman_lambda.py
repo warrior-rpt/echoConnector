@@ -199,9 +199,9 @@ Respond ONLY with valid JSON, no markdown formatting.
 """
     
     try:
-        # Call Bedrock
+        # Call Bedrock using the new Inference Profile ID
         response = bedrock.invoke_model(
-            modelId='anthropic.claude-3-5-sonnet-20240620-v1:0',
+            modelId='global.anthropic.claude-sonnet-4-6',
             body=json.dumps({
                 "anthropic_version": "bedrock-2023-05-31",
                 "max_tokens": 2000,
