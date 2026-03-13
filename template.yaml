@@ -1,0 +1,84 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: EchoConnector - CloudWatch Alarm AI Analyzer
+
+Parameters:
+  RunbooksBucket:
+    Type: String
+    Description: Name of the existing S3 bucket containing runbooks (e.g., echo-runbooks-1710172800)
+  SlackWebhookSecret:
+    Type: String
+    Default: 'echo/slack-webhook'
+    Description: Name of the secret in Secrets Manager for Slack
+
+Resources:
+  # 1. DynamoDB Table for Incidents
+  IncidentsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: echo-incidents
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: incidentId
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: S
+        - AttributeName: severity
+          AttributeType: S
+      KeySchema:
+        - AttributeName: incidentId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: severity-timestamp-index
+          KeySchema:
+            - AttributeName: severity
+              KeyType: HASH
+            - AttributeName: timestamp
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+
+  # 2. Lambda Function
+  EchoWatchmanFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: echo-watchman
+      CodeUri: lambda/
+      Handler: watchman_lambda.lambda_handler
+      Runtime: python3.12
+      Architectures:
+        - x86_64
+      Timeout: 60
+      MemorySize: 256
+
+      Environment:
+        Variables:
+          RUNBOOKS_BUCKET: !Ref RunbooksBucket
+          INCIDENTS_TABLE: !Ref IncidentsTable
+          SLACK_WEBHOOK_SECRET: !Ref SlackWebhookSecret
+      Policies:
+        # 1. Standard SAM policy templates
+        - S3ReadPolicy:
+            BucketName: !Ref RunbooksBucket
+        - DynamoDBCrudPolicy:
+            TableName: !Ref IncidentsTable
+        # 2. Custom permissions for Bedrock, CloudWatch, and Secrets Manager
+        - Statement:
+            - Effect: Allow
+              Action:
+                - cloudwatch:DescribeAlarms
+                - bedrock:InvokeModel
+              Resource: "*"
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:echo/*'
+
+
+Outputs:
+  LambdaArn:
+    Description: "EchoWatchman Lambda Function ARN"
+    Value: !GetAtt EchoWatchmanFunction.Arn
+  TableArn:
+    Description: "Incidents DynamoDB Table ARN"
+    Value: !GetAtt IncidentsTable.Arn

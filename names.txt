@@ -1,0 +1,20 @@
+3 bucket created successfully!
+📝 Bucket name: echo-runbooks-1773428384
+
+⚠️  IMPORTANT: Save this bucket name!
+   You'll need it for:
+   - Lambda environment variable: RUNBOOKS_BUCKET=echo-runbooks-1773428384
+   - Uploading runbooks: aws s3 sync runbooks/ s3://echo-runbooks-1773428384/
+
+
+   ✅ DynamoDB table created successfully!
+📝 Table name: echo-incidents
+   Region: us-east-1
+   Billing mode: On-Demand (auto-scaling)
+
+Table schema:
+  - Primary Key: incidentId (String)
+  - GSI: severity-timestamp-index (for querying by severity)
+
+⚠️  Save this table name for Lambda environment variable:
+   INCIDENTS_TABLE=echo-incidents
