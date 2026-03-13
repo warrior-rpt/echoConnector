@@ -203,8 +203,8 @@ Respond ONLY with valid JSON, no markdown formatting.
         # Fetch AI Config from Secrets Manager
         secret_response = secrets.get_secret_value(SecretId=AI_CONFIG_SECRET)
         ai_config = json.loads(secret_response['SecretString'])
-        model_id = ai_config.get('model_id', 'global.anthropic.claude-sonnet-4-6')
-        anthropic_version = ai_config.get('anthropic_version', 'bedrock-2023-05-31')
+        model_id = ai_config['model_id']
+        anthropic_version = ai_config['anthropic_version']
         
         # Call Bedrock using the configured Inference Profile ID and version
         response = bedrock.invoke_model(
