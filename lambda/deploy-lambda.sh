@@ -9,6 +9,7 @@ HANDLER="watchman_lambda.lambda_handler"
 RUNTIME="python3.12"
 INCIDENTS_TABLE="echo-incidents"
 SLACK_WEBHOOK_SECRET="echo/slack-webhook"
+AI_CONFIG_SECRET="echo/ai-config"
 
 # --- DETECT ACCOUNT & REGION ---
 echo "Checking AWS environment..."
@@ -68,7 +69,7 @@ if [ $? -eq 0 ]; then
 
     aws lambda update-function-configuration \
         --function-name "$FUNCTION_NAME" \
-        --environment "Variables={RUNBOOKS_BUCKET=$RUNBOOKS_BUCKET,INCIDENTS_TABLE=$INCIDENTS_TABLE,SLACK_WEBHOOK_SECRET=$SLACK_WEBHOOK_SECRET}" \
+        --environment "Variables={RUNBOOKS_BUCKET=$RUNBOOKS_BUCKET,INCIDENTS_TABLE=$INCIDENTS_TABLE,SLACK_WEBHOOK_SECRET=$SLACK_WEBHOOK_SECRET,AI_CONFIG_SECRET=$AI_CONFIG_SECRET}" \
         --profile Hack
 else
     echo "Function not found. Creating new function..."
@@ -82,7 +83,7 @@ else
         --zip-file "fileb://$ZIP_NAME" \
         --timeout 60 \
         --memory-size 256 \
-        --environment "Variables={RUNBOOKS_BUCKET=$RUNBOOKS_BUCKET,INCIDENTS_TABLE=$INCIDENTS_TABLE,SLACK_WEBHOOK_SECRET=$SLACK_WEBHOOK_SECRET}" \
+        --environment "Variables={RUNBOOKS_BUCKET=$RUNBOOKS_BUCKET,INCIDENTS_TABLE=$INCIDENTS_TABLE,SLACK_WEBHOOK_SECRET=$SLACK_WEBHOOK_SECRET,AI_CONFIG_SECRET=$AI_CONFIG_SECRET}" \
         --profile Hack
 fi
 
