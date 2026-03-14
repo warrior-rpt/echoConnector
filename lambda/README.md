@@ -2,7 +2,7 @@
 
 This directory contains the enterprise-grade implementation of the **Echo Watchman** Lambda function. It is architected for scalability, modularity, and ease of maintenance during the hackathon.
 
-## 🏗️ Project Structure
+## Project Structure
 
 The project follows a modular service-oriented architecture:
 
@@ -22,7 +22,7 @@ lambda/
     └── clients.py          # Centralized AWS Client factory
 ```
 
-## 🛠️ Components
+## Components
 
 - **`core/engine.py`**: The "brain" of the operation. It coordinates the flow between polling alarms, retrieving runbooks, generating AI analysis, and sending notifications.
 - **`services/bedrock.py`**: Interfaces with Amazon Bedrock to provide intelligent incident analysis and suggested fixes.
@@ -30,7 +30,7 @@ lambda/
 - **`config/environment.py`**: Centrally manages all configuration and secrets (Slack webhooks, AI model settings) with smart caching to optimize performance.
 - **`common/clients.py`**: Ensures consistent AWS client initialization across all modules.
 
-## 🚀 Deployment
+## Deployment
 
 There are two ways to deploy this Lambda. **SAM (Serverless Application Model)** is the preferred production method as it manages resources like EventBridge schedules and IAM policies automatically.
 
@@ -55,7 +55,7 @@ chmod +x deploy-lambda.sh
 ./deploy-lambda.sh
 ```
 
-## 🧪 Integration Testing
+## Integration Testing
 A comprehensive integration suite is available in `scripts/test_integration.py`. It verifies:
 - **Data Integrity**: Creation, batch retrieval, and querying of incidents.
 - **State Machine**: Correct handling of status transitions and validation logic.

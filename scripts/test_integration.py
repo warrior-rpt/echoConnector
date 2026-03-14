@@ -12,12 +12,12 @@ from common.clients import get_dynamodb_resource
 from config.environment import INCIDENTS_TABLE_NAME
 
 def log_test(name, result, message=""):
-    status = "✅ PASS" if result else "❌ FAIL"
+    status = "PASS" if result else "FAIL"
     print(f"{status} - {name} {(': ' + message) if message else ''}")
     return result
 
 def run_integration_tests():
-    print("🚀 Starting EchoConnector Integration Tests...")
+    print("Starting EchoConnector Integration Tests...")
     print(f"Table: {INCIDENTS_TABLE_NAME}\n")
     
     test_incident_ids = []
@@ -38,8 +38,7 @@ def run_integration_tests():
         
         success &= log_test("Create test incidents", len(test_incident_ids) == 5, f"Created {len(test_incident_ids)}")
 
-        # Wait for GSI consistency
-        print("  ⏳ Waiting for Global Secondary Index to sync...")
+        print("  Waiting for Global Secondary Index to sync...")
         time.sleep(3)
 
         # 2. Retrieve individual incident
@@ -84,15 +83,15 @@ def run_integration_tests():
         success &= log_test("Automatic cleanup", deleted_count == 5)
 
     except Exception as e:
-        print(f"💥 Test suite crashed: {e}")
+        print(f"Test suite crashed: {e}")
         success = False
 
     print("\n=======================================")
     if success:
-        print("🎉 ALL INTEGRATION TESTS PASSED!")
+        print("ALL INTEGRATION TESTS PASSED!")
         sys.exit(0)
     else:
-        print("🚨 SOME TESTS FAILED.")
+        print("SOME TESTS FAILED.")
         sys.exit(1)
 
 if __name__ == "__main__":

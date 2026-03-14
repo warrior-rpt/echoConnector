@@ -22,10 +22,10 @@ export PYTHONPATH="$PYTHONPATH:$(pwd)"
 python3 ../scripts/test_integration.py
 
 if [ $? -ne 0 ]; then
-    echo "❌ Integration tests failed. Aborting deployment."
+    echo "Integration tests failed. Aborting deployment."
     exit 1
 fi
-echo "✅ Integration tests passed."
+echo "Integration tests passed."
 
 # --- DETECT ACCOUNT & REGION ---
 echo "Checking AWS environment..."
