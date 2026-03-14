@@ -41,16 +41,21 @@ Use AWS SAM to build and deploy the entire stack:
 # Build the project (uses container to ensure compatibility)
 sam build --use-container
 
-# Deploy to AWS
-sam deploy
+# Deploy to AWS using a specific profile
+sam deploy --profile YOUR_PROFILE_NAME
 ```
 
 ### 2. Manual/Development Script (Deprecated)
-A lightweight script is provided for rapid code updates during active development:
+A lightweight script is provided for rapid code updates during active development. You can pass your AWS profile name as the first argument (defaults to `Hack` if omitted):
 
 ```bash
 chmod +x deploy-lambda.sh
+
+# Deploy using default 'Hack' profile
 ./deploy-lambda.sh
+
+# Deploy using a custom profile
+./deploy-lambda.sh YOUR_PROFILE_NAME
 ```
 
 > [!WARNING]

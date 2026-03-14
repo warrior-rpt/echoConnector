@@ -11,10 +11,14 @@ INCIDENTS_TABLE="echo-incidents"
 SLACK_WEBHOOK_SECRET="echo/slack-webhook"
 AI_CONFIG_SECRET="echo/ai-config"
 
+# --- PROFILE CONFIGURATION ---
+AWS_PROFILE=${1:-"Hack"}
+echo "Using AWS Profile: $AWS_PROFILE"
+
 # --- DETECT ACCOUNT & REGION ---
 echo "Checking AWS environment..."
-ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text --profile Hack)
-REGION=$(aws configure get region --profile Hack)
+ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text --profile "$AWS_PROFILE")
+REGION=$(aws configure get region --profile "$AWS_PROFILE")
 REGION=${REGION:-us-east-1}
 
 if [ -z "$ACCOUNT_ID" ]; then
@@ -24,7 +28,7 @@ fi
 
 # --- FIND S3 BUCKET ---
 # We look for the most recent echo-runbooks bucket
-RUNBOOKS_BUCKET=$(aws s3 ls --profile Hack | grep echo-runbooks | awk '{print $3}' | tail -n 1)
+RUNBOOKS_BUCKET=$(aws s3 ls --profile "$AWS_PROFILE" | grep echo-runbooks | awk '{print $3}' | tail -n 1)
 
 if [ -z "$RUNBOOKS_BUCKET" ]; then
     echo "Warning: Could not find an echo-runbooks bucket automatically."
@@ -51,26 +55,26 @@ echo "Package created: $(du -sh $ZIP_NAME | awk '{print $1}')"
 echo "Deploying to AWS ($REGION)..."
 
 # Check if function exists
-aws lambda get-function --function-name "$FUNCTION_NAME" --profile Hack > /dev/null 2>&1
+aws lambda get-function --function-name "$FUNCTION_NAME" --profile "$AWS_PROFILE" > /dev/null 2>&1
 
 if [ $? -eq 0 ]; then
     echo "Function exists. Updating code..."
     aws lambda update-function-code \
         --function-name "$FUNCTION_NAME" \
         --zip-file "fileb://$ZIP_NAME" \
-        --profile Hack
+        --profile "$AWS_PROFILE"
     
     echo "Waiting for function update to complete..."
     aws lambda wait function-updated \
         --function-name "$FUNCTION_NAME" \
-        --profile Hack
+        --profile "$AWS_PROFILE"
     
     echo "Updating configuration..."
 
     aws lambda update-function-configuration \
         --function-name "$FUNCTION_NAME" \
         --environment "Variables={RUNBOOKS_BUCKET=$RUNBOOKS_BUCKET,INCIDENTS_TABLE=$INCIDENTS_TABLE,SLACK_WEBHOOK_SECRET=$SLACK_WEBHOOK_SECRET,AI_CONFIG_SECRET=$AI_CONFIG_SECRET}" \
-        --profile Hack
+        --profile "$AWS_PROFILE"
 else
     echo "Function not found. Creating new function..."
     ROLE_ARN="arn:aws:iam::${ACCOUNT_ID}:role/EchoWatchmanRole"
@@ -84,7 +88,7 @@ else
         --timeout 60 \
         --memory-size 256 \
         --environment "Variables={RUNBOOKS_BUCKET=$RUNBOOKS_BUCKET,INCIDENTS_TABLE=$INCIDENTS_TABLE,SLACK_WEBHOOK_SECRET=$SLACK_WEBHOOK_SECRET,AI_CONFIG_SECRET=$AI_CONFIG_SECRET}" \
-        --profile Hack
+        --profile "$AWS_PROFILE"
 fi
 
 
