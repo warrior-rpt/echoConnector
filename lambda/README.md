@@ -46,16 +46,25 @@ sam deploy --profile YOUR_PROFILE_NAME
 ```
 
 ### 2. Manual/Development Script (Deprecated)
-A lightweight script is provided for rapid code updates during active development. You can pass your AWS profile name as the first argument (defaults to `Hack` if omitted):
+A lightweight script is provided for rapid code updates. **It now includes automatic integration testing** to ensure no regressions are pushed.
 
 ```bash
 chmod +x deploy-lambda.sh
 
-# Deploy using default 'Hack' profile
+# Deploy using default 'Hack' profile (Includes Integration Tests!)
 ./deploy-lambda.sh
+```
 
-# Deploy using a custom profile
-./deploy-lambda.sh YOUR_PROFILE_NAME
+## 🧪 Integration Testing
+A comprehensive integration suite is available in `scripts/test_integration.py`. It verifies:
+- **Data Integrity**: Creation, batch retrieval, and querying of incidents.
+- **State Machine**: Correct handling of status transitions and validation logic.
+- **Analytics**: Verification of statistics generation and severity determination.
+
+To run tests manually:
+```bash
+export AWS_PROFILE=YOUR_PROFILE
+python3 scripts/test_integration.py
 ```
 
 > [!WARNING]
