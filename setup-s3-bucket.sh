@@ -27,10 +27,10 @@ mkdir -p runbooks/aws/lambda
 mkdir -p runbooks/aws/ecs
 
 echo ""
-echo "✅ S3 bucket created successfully!"
+echo "S3 bucket created successfully!"
 echo "📝 Bucket name: $BUCKET_NAME"
 echo ""
-echo "⚠️  IMPORTANT: Save this bucket name!"
+echo "IMPORTANT: Save this bucket name!"
 echo "   You'll need it for:"
 echo "   - Lambda environment variable: RUNBOOKS_BUCKET=$BUCKET_NAME"
 echo "   - Uploading runbooks: aws s3 sync runbooks/ s3://$BUCKET_NAME/"

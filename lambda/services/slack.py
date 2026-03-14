@@ -16,7 +16,7 @@ class SlackService:
             'blocks': [
                 {
                     'type': 'header',
-                    'text': {'type': 'plain_text', 'text': f"🚨 {severity} INCIDENT"}
+                    'text': {'type': 'plain_text', 'text': f"{severity} INCIDENT"}
                 },
                 {
                     'type': 'section',
