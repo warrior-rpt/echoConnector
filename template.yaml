@@ -10,6 +10,10 @@ Parameters:
     Type: String
     Default: 'echo/slack-webhook'
     Description: Name of the secret in Secrets Manager for Slack
+  AiConfigSecret:
+    Type: String
+    Default: 'echo/ai-config'
+    Description: Name of the secret in Secrets Manager for AI Configuration (model ID, etc.)
 
 Resources:
   # 1. DynamoDB Table for Incidents
@@ -56,6 +60,15 @@ Resources:
           RUNBOOKS_BUCKET: !Ref RunbooksBucket
           INCIDENTS_TABLE: !Ref IncidentsTable
           SLACK_WEBHOOK_SECRET: !Ref SlackWebhookSecret
+          AI_CONFIG_SECRET: !Ref AiConfigSecret
+      Events:
+        ScanSchedule:
+          Type: Schedule
+          Properties:
+            Schedule: rate(1 minute)
+            Name: WatchmanScanSchedule
+            Description: Trigger Watchman scan every minute
+            Enabled: True
       Policies:
         # 1. Standard SAM policy templates
         - S3ReadPolicy:
