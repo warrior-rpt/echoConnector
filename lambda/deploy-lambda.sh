@@ -42,8 +42,8 @@ cd "$(dirname "$0")" # Ensure we are in the script's directory (lambda/)
 ZIP_NAME="deploy_package.zip"
 rm -f "$ZIP_NAME"
 
-# Add core files
-zip -q "$ZIP_NAME" watchman_lambda.py data_helpers.py
+# Add core files and subdirectories
+zip -r -q "$ZIP_NAME" . -x "*.zip" "*.sh" "__pycache__/*" "*/__pycache__/*" "*.vmdk" ".DS_Store"
 
 echo "Package created: $(du -sh $ZIP_NAME | awk '{print $1}')"
 
