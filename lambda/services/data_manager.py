@@ -32,7 +32,7 @@ class DataManager:
         dynamodb = get_dynamodb_resource()
         table = dynamodb.Table(INCIDENTS_TABLE_NAME)
         
-        incident_id = f"INC-{datetime.utcnow().strftime('%Y%m%d-%H%M%S')}"
+        incident_id = f"INC-{datetime.utcnow().strftime('%Y%m%d-%H%M%S-%f')}"
         incident = {
             'incidentId': incident_id,
             'timestamp': datetime.utcnow().isoformat() + 'Z',

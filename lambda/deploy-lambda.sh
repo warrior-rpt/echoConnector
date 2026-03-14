@@ -15,6 +15,18 @@ AI_CONFIG_SECRET="echo/ai-config"
 AWS_PROFILE=${1:-"Hack"}
 echo "Using AWS Profile: $AWS_PROFILE"
 
+# --- INTEGRATION TESTING ---
+echo "Running pre-deployment integration tests..."
+export AWS_PROFILE="$AWS_PROFILE"
+export PYTHONPATH="$PYTHONPATH:$(pwd)"
+python3 ../scripts/test_integration.py
+
+if [ $? -ne 0 ]; then
+    echo "❌ Integration tests failed. Aborting deployment."
+    exit 1
+fi
+echo "✅ Integration tests passed."
+
 # --- DETECT ACCOUNT & REGION ---
 echo "Checking AWS environment..."
 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text --profile "$AWS_PROFILE")
