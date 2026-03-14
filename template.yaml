@@ -14,39 +14,16 @@ Parameters:
     Type: String
     Default: 'echo/ai-config'
     Description: Name of the secret in Secrets Manager for AI Configuration (model ID, etc.)
+  IncidentsTableName:
+    Type: String
+    Default: 'echo-incidents'
+    Description: Name of the existing DynamoDB table for incidents
 
 Resources:
-  # 1. DynamoDB Table for Incidents
-  IncidentsTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: echo-incidents
-      BillingMode: PAY_PER_REQUEST
-      AttributeDefinitions:
-        - AttributeName: incidentId
-          AttributeType: S
-        - AttributeName: timestamp
-          AttributeType: S
-        - AttributeName: severity
-          AttributeType: S
-      KeySchema:
-        - AttributeName: incidentId
-          KeyType: HASH
-      GlobalSecondaryIndexes:
-        - IndexName: severity-timestamp-index
-          KeySchema:
-            - AttributeName: severity
-              KeyType: HASH
-            - AttributeName: timestamp
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
-
-  # 2. Lambda Function
+  # Lambda Function
   EchoWatchmanFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: echo-watchman
       CodeUri: lambda/
       Handler: watchman_lambda.lambda_handler
       Runtime: python3.12
@@ -58,7 +35,7 @@ Resources:
       Environment:
         Variables:
           RUNBOOKS_BUCKET: !Ref RunbooksBucket
-          INCIDENTS_TABLE: !Ref IncidentsTable
+          INCIDENTS_TABLE: !Ref IncidentsTableName
           SLACK_WEBHOOK_SECRET: !Ref SlackWebhookSecret
           AI_CONFIG_SECRET: !Ref AiConfigSecret
       Events:
@@ -74,7 +51,7 @@ Resources:
         - S3ReadPolicy:
             BucketName: !Ref RunbooksBucket
         - DynamoDBCrudPolicy:
-            TableName: !Ref IncidentsTable
+            TableName: !Ref IncidentsTableName
         # 2. Custom permissions for Bedrock, CloudWatch, and Secrets Manager
         - Statement:
             - Effect: Allow
@@ -92,6 +69,3 @@ Outputs:
   LambdaArn:
     Description: "EchoWatchman Lambda Function ARN"
     Value: !GetAtt EchoWatchmanFunction.Arn
-  TableArn:
-    Description: "Incidents DynamoDB Table ARN"
-    Value: !GetAtt IncidentsTable.Arn
