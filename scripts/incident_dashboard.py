@@ -9,7 +9,7 @@ import sys
 import json
 import boto3
 import argparse
-from datetime import datetime
+from datetime import datetime, timedelta
 from collections import Counter
 
 # Set up paths for local imports
@@ -22,7 +22,7 @@ try:
 except Exception:
     pass 
 
-from data_helpers_advanced import get_incident_statistics, incidents_table
+from data_helpers_advanced import get_incident_statistics, get_incidents_table
 from boto3.dynamodb.conditions import Key
 
 def draw_bar(count: int, total: int, max_width: int = 50) -> str:
@@ -41,7 +41,7 @@ def fetch_detailed_metrics(time_range_hours: int) -> dict:
     # 1. Grab base statistics from data_helpers_advanced
     base_stats = get_incident_statistics(time_range_hours=time_range_hours)
     
-    threshold_time = datetime.utcnow() - __import__('datetime').timedelta(hours=time_range_hours)
+    threshold_time = datetime.utcnow() - timedelta(hours=time_range_hours)
     threshold_iso = threshold_time.isoformat() + 'Z'
     
     # 2. Iterate manually through the same GSI mapping to calculate additional groupings
@@ -51,6 +51,7 @@ def fetch_detailed_metrics(time_range_hours: int) -> dict:
     
     # Needs to loop since we're organizing by severity in our Global Secondary Index
     try:
+        incidents_table = get_incidents_table()
         for severity in ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']:
             response = incidents_table.query(
                 IndexName='severity-timestamp-index',

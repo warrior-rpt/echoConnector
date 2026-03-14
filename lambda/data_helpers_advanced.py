@@ -12,8 +12,11 @@ from boto3.dynamodb.conditions import Key
 
 # Use the same table definition as data_helpers
 INCIDENTS_TABLE = os.environ.get('INCIDENTS_TABLE', 'echo-incidents')
-dynamodb = boto3.resource('dynamodb')
-incidents_table = dynamodb.Table(INCIDENTS_TABLE)
+
+def get_incidents_table():
+    """Returns the DynamoDB table resource, ensuring it's initialized correctly."""
+    dynamodb = boto3.resource('dynamodb')
+    return dynamodb.Table(INCIDENTS_TABLE)
 
 # Valid status transitions mapping the state machine
 VALID_TRANSITIONS = {
@@ -36,6 +39,7 @@ def batch_get_incidents(incident_ids: List[str]) -> List[Dict]:
     keys = [{'incidentId': inc_id} for inc_id in incident_ids[:100]] 
     
     try:
+        dynamodb = boto3.resource('dynamodb')
         response = dynamodb.batch_get_item(
             RequestItems={
                 INCIDENTS_TABLE: {
@@ -64,6 +68,7 @@ def query_incidents_with_pagination(severity: str, limit: int = 20, last_evaluat
         if last_evaluated_key:
             query_kwargs['ExclusiveStartKey'] = last_evaluated_key
             
+        incidents_table = get_incidents_table()
         response = incidents_table.query(**query_kwargs)
         
         items = response.get('Items', [])
@@ -90,6 +95,7 @@ def transition_incident_status(incident_id: str, new_status: str, resolution_not
     e.g., new -> investigating -> resolved
     """
     try:
+        incidents_table = get_incidents_table()
         # 1. Fetch current incident
         response = incidents_table.get_item(Key={'incidentId': incident_id})
         incident = response.get('Item')
@@ -157,6 +163,7 @@ def get_incident_statistics(time_range_hours: int = 24) -> Dict:
     resolved_count = 0
     
     try:
+        incidents_table = get_incidents_table()
         for severity in by_severity.keys():
             # Query the Global Secondary Index mapping severity to timestamp
             response = incidents_table.query(
