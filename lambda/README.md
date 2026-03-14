@@ -32,18 +32,40 @@ lambda/
 
 ## 🚀 Deployment
 
-Use the included deployment script to package and push the enterprise structure to AWS:
+There are two ways to deploy this Lambda. **SAM (Serverless Application Model)** is the preferred production method as it manages resources like EventBridge schedules and IAM policies automatically.
+
+### 1. Production Deployment (Recommended)
+Use AWS SAM to build and deploy the entire stack:
+
+```bash
+# Build the project (uses container to ensure compatibility)
+sam build --use-container
+
+# Deploy to AWS using a specific profile
+sam deploy --profile YOUR_PROFILE_NAME
+```
+
+### 2. Manual/Development Script (Deprecated)
+A lightweight script is provided for rapid code updates during active development. You can pass your AWS profile name as the first argument (defaults to `Hack` if omitted):
 
 ```bash
 chmod +x deploy-lambda.sh
+
+# Deploy using default 'Hack' profile
 ./deploy-lambda.sh
+
+# Deploy using a custom profile
+./deploy-lambda.sh YOUR_PROFILE_NAME
 ```
 
-The script automatically:
+> [!WARNING]
+> The manual script `deploy-lambda.sh` only updates the code of a pre-existing Lambda. It does not manage triggers, environment variables, or permissions. This method is kept **temporarily** for development speed and will be removed in favor of SAM.
+
+The script:
 1. Detects your AWS account and region.
 2. Finds the active `echo-runbooks` S3 bucket.
-3. Packages the entire modular directory structure.
-4. Updates the Lambda code and environment configuration.
+3. Packages the modular directory structure.
+4. Updates the Lambda code binary.
 
 ---
 *Developed for the Hackathon 2026 - EchoConnector Project.*
