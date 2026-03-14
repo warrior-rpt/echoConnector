@@ -32,8 +32,8 @@ ENV/
 # Configuration and Secrets
 samconfig.toml
 response.json
+# Deployment artifacts
 *.zip
-lambda/package/
 lambda/deploy_package.zip
 
 # IDEs
@@ -47,3 +47,7 @@ lambda/deploy_package.zip
 
 # Temporary files
 /tmp/
+*.pdf
+*.docx
+scripts/debug_dynamo.py
+scripts/seed_incidents.py
