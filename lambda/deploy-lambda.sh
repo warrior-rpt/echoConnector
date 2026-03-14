@@ -43,7 +43,7 @@ ZIP_NAME="deploy_package.zip"
 rm -f "$ZIP_NAME"
 
 # Add core files
-zip -q "$ZIP_NAME" watchman_lambda.py data_helpers.py
+zip -q "$ZIP_NAME" watchman_lambda.py data_helpers.py data_helpers_advanced.py
 
 echo "Package created: $(du -sh $ZIP_NAME | awk '{print $1}')"
 
