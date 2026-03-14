@@ -22,7 +22,8 @@ try:
 except Exception:
     pass 
 
-from data_helpers_advanced import get_incident_statistics, get_incidents_table
+from services.data_manager import DataManager
+from common.clients import get_dynamodb_resource
 from boto3.dynamodb.conditions import Key
 
 def draw_bar(count: int, total: int, max_width: int = 50) -> str:
@@ -38,8 +39,8 @@ def fetch_detailed_metrics(time_range_hours: int) -> dict:
     Combines the basic `get_incident_statistics` with deeper insights (status/service aggregations)
     for dashboarding.
     """
-    # 1. Grab base statistics from data_helpers_advanced
-    base_stats = get_incident_statistics(time_range_hours=time_range_hours)
+    # 1. Grab base statistics from DataManager
+    base_stats = DataManager.get_incident_statistics(hours=time_range_hours)
     
     threshold_time = datetime.utcnow() - timedelta(hours=time_range_hours)
     threshold_iso = threshold_time.isoformat() + 'Z'
@@ -51,9 +52,9 @@ def fetch_detailed_metrics(time_range_hours: int) -> dict:
     
     # Needs to loop since we're organizing by severity in our Global Secondary Index
     try:
-        incidents_table = get_incidents_table()
+        table = get_dynamodb_resource().Table(os.environ.get('INCIDENTS_TABLE', 'echo-incidents'))
         for severity in ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']:
-            response = incidents_table.query(
+            response = table.query(
                 IndexName='severity-timestamp-index',
                 KeyConditionExpression=Key('severity').eq(severity) & Key('timestamp').gt(threshold_iso)
             )
