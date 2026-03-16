@@ -1,0 +1,12 @@
+{
+    "venvPath": ".",
+    "venv": ".venv",
+    "include": [
+        "lambda"
+    ],
+    "extraPaths": [
+        "lambda"
+    ],
+    "typeCheckingMode": "basic",
+    "reportMissingImports": true
+}

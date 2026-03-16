@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# AWS SAM
+.aws-sam/
+
+# Configuration and Secrets
+samconfig.toml
+response.json
+# Deployment artifacts
+*.zip
+lambda/deploy_package.zip
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Temporary files
+/tmp/
+*.pdf
+*.docx
+scripts/debug_dynamo.py
+scripts/seed_incidents.py

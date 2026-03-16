@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: EchoConnector - CloudWatch Alarm AI Analyzer
+
+Parameters:
+  RunbooksBucket:
+    Type: String
+    Description: Name of the existing S3 bucket containing runbooks (e.g., echo-runbooks-1710172800)
+  SlackWebhookSecret:
+    Type: String
+    Default: 'echo/slack-webhook'
+    Description: Name of the secret in Secrets Manager for Slack
+  AiConfigSecret:
+    Type: String
+    Default: 'echo/ai-config'
+    Description: Name of the secret in Secrets Manager for AI Configuration (model ID, etc.)
+  IncidentsTableName:
+    Type: String
+    Default: 'echo-incidents'
+    Description: Name of the existing DynamoDB table for incidents
+
+Resources:
+  # Lambda Function
+  EchoWatchmanFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/
+      Handler: watchman_lambda.lambda_handler
+      Runtime: python3.12
+      Architectures:
+        - x86_64
+      Timeout: 60
+      MemorySize: 256
+
+      Environment:
+        Variables:
+          RUNBOOKS_BUCKET: !Ref RunbooksBucket
+          INCIDENTS_TABLE: !Ref IncidentsTableName
+          SLACK_WEBHOOK_SECRET: !Ref SlackWebhookSecret
+          AI_CONFIG_SECRET: !Ref AiConfigSecret
+      Events:
+        ScanSchedule:
+          Type: Schedule
+          Properties:
+            Schedule: rate(1 minute)
+            Name: WatchmanScanSchedule
+            Description: Trigger Watchman scan every minute
+            Enabled: True
+      Policies:
+        # 1. Standard SAM policy templates
+        - S3ReadPolicy:
+            BucketName: !Ref RunbooksBucket
+        - DynamoDBCrudPolicy:
+            TableName: !Ref IncidentsTableName
+        # 2. Custom permissions for Bedrock, CloudWatch, and Secrets Manager
+        - Statement:
+            - Effect: Allow
+              Action:
+                - cloudwatch:DescribeAlarms
+                - bedrock:InvokeModel
+              Resource: "*"
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:echo/*'
+
+
+Outputs:
+  LambdaArn:
+    Description: "EchoWatchman Lambda Function ARN"
+    Value: !GetAtt EchoWatchmanFunction.Arn
