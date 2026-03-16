@@ -5,7 +5,20 @@ from boto3.dynamodb.conditions import Key
 from common.clients import get_s3_client, get_dynamodb_resource, get_bedrock_client
 from config.environment import RUNBOOKS_BUCKET, INCIDENTS_TABLE_NAME
 
+from decimal import Decimal
+
 class DataManager:
+    @staticmethod
+    def _float_to_decimal(obj):
+        """Recursively convert floats to Decimals for DynamoDB"""
+        if isinstance(obj, float):
+            return Decimal(str(obj))
+        if isinstance(obj, dict):
+            return {k: DataManager._float_to_decimal(v) for k, v in obj.items()}
+        if isinstance(obj, list):
+            return [DataManager._float_to_decimal(i) for i in obj]
+        return obj
+
     @staticmethod
     def get_runbook(alarm: Dict) -> Optional[str]:
         """Fetch runbook from S3 based on alarm namespace/metric"""
@@ -44,6 +57,9 @@ class DataManager:
             'createdAt': int(datetime.utcnow().timestamp()),
             'updatedAt': int(datetime.utcnow().timestamp())
         }
+        
+        # Convert floats to Decimals
+        incident = DataManager._float_to_decimal(incident)
         
         table.put_item(Item=incident)
         return incident_id
